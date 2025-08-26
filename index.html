@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Caça ao Tesouro: O Mapa da Habilitação</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Merriweather', serif;
+            /* Imagem de fundo atualizada para um mapa mais detalhado */
+            background-image: url('https://i.pinimg.com/originals/c8/63/35/c863354728c342374d7336a2a4038a33.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+        .font-pirate {
+            font-family: 'IM Fell English SC', serif;
+        }
+        .card-bg {
+            background-color: rgba(253, 246, 221, 0.92); /* Cor de pergaminho com transparência */
+            border: 2px solid #854d0e; /* Borda marrom escura */
+        }
+        .btn-option {
+            transition: all 0.3s ease;
+            border: 2px solid #c2a17d;
+            background-color: #f5eadd;
+        }
+        .btn-option:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            border-color: #a17b54;
+        }
+        .btn-option:disabled {
+            cursor: not-allowed;
+        }
+        .correct {
+            background-color: #d4edda !important;
+            border-color: #c3e6cb !important;
+            color: #155724 !important;
+        }
+        .incorrect {
+            background-color: #f8d7da !important;
+            border-color: #f5c6cb !important;
+            color: #721c24 !important;
+        }
+        .explanation {
+            border-left: 4px solid #854d0e;
+            background-color: rgba(255, 251, 235, 0.95);
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <main id="quiz-container" class="w-full max-w-2xl mx-auto">
+        <div class="card-bg rounded-xl shadow-2xl p-6 md:p-8 text-center text-amber-900">
+            <h1 class="font-pirate text-4xl md:text-5xl mb-2">Caça ao Tesouro</h1>
+            <h2 class="text-lg md:text-xl mb-6">O Mapa da Habilitação Escolar</h2>
+
+            <div id="question-area">
+                <p id="progress-text" class="text-sm mb-2 text-amber-800"></p>
+                <div class="w-full bg-amber-200 rounded-full h-2.5 mb-4">
+                    <div id="progress-bar" class="bg-amber-600 h-2.5 rounded-full" style="width: 0%"></div>
+                </div>
+
+                <h3 id="question-text" class="text-xl font-bold mb-6 min-h-[100px]">Carregando enigma...</h3>
+                
+                <div id="options-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Opções serão inseridas aqui pelo JavaScript -->
+                </div>
+            </div>
+
+            <div id="explanation-area" class="mt-6 text-left p-4 rounded-lg explanation hidden">
+                <h4 class="font-bold text-lg mb-2 text-amber-900">A Resposta Correta:</h4>
+                <p id="explanation-text" class="text-amber-800"></p>
+            </div>
+            
+            <button id="next-btn" class="font-pirate bg-amber-800 text-white py-3 px-8 rounded-lg shadow-lg hover:bg-amber-900 transition-all duration-300 mt-6 text-xl hidden">Próximo Enigma &rarr;</button>
+
+        </div>
+    </main>
+
+    <div id="results-container" class="w-full max-w-2xl mx-auto text-center hidden">
+        <div class="card-bg rounded-xl shadow-2xl p-8 md:p-10 text-amber-900">
+            <h1 class="font-pirate text-4xl md:text-5xl mb-4">Tesouro Encontrado!</h1>
+            <p class="text-lg mb-4">Você desvendou os enigmas da habilitação escolar!</p>
+            <p class="text-2xl font-bold mb-6">Sua pontuação final: <span id="final-score" class="text-amber-800"></span></p>
+            <img src="https://img.icons8.com/external-flaticons-flat-flat-icons/128/external-treasure-pirates-flaticons-flat-flat-icons.png" alt="Ícone de baú do tesouro" class="mx-auto mb-6">
+            <p class="text-md">Agora você está mais perto de garantir os recursos para sua escola. Continue navegando pelos mares do conhecimento!</p>
+        </div>
+    </div>
+
+
+    <script>
+        // Array de questões atualizado para conter apenas 3 perguntas
+        const quizData = [
+            {
+                question: "Sua escola é representada por uma Associação de Pais e Mestres (APM) que gerencia diretamente os recursos recebidos. Essa APM é classificada como uma:",
+                options: ["EEx (Entidade Executora)", "UEx (Unidade Executora)", "EM (Entidade Mantenedora)", "Conselho Fiscal"],
+                correctAnswer: 1,
+                explanation: "A Unidade Executora (UEx) é a entidade da comunidade escolar (como APM, Círculo de Pais e Mestres, etc.) responsável pela gestão dos recursos de programas específicos em uma escola."
+            },
+            {
+                question: "Uma prefeitura recebe verbas do governo para administrar e aplicar em 10 escolas que não têm uma associação própria. Neste cenário, a prefeitura atua como uma:",
+                options: ["UEx (Unidade Executora)", "UEx Consorciada", "EM (Entidade Mantenedora)", "EEx (Entidade Executora)"],
+                correctAnswer: 3,
+                explanation: "A Entidade Executora (EEx) é uma entidade, como uma prefeitura ou secretaria de educação, que centraliza a gestão dos recursos para um conjunto de escolas que não possuem UEx própria."
+            },
+            {
+                question: "Qual é a principal diferença entre uma UEx (Unidade Executora) e uma EM (Entidade Mantenedora)?",
+                options: [
+                    "Não há diferença, são a mesma coisa.",
+                    "A UEx é sempre pública e a EM é sempre privada.",
+                    "A EM é responsável pela manutenção geral da escola, enquanto a UEx gerencia recursos de programas específicos.",
+                    "A UEx fiscaliza a EM."
+                ],
+                correctAnswer: 2,
+                explanation: "A Entidade Mantenedora (EM) cuida da infraestrutura e funcionamento geral da escola. Já a Unidade Executora (UEx) foca na administração de verbas de programas governamentais específicos."
+            }
+        ];
+
+        // Elementos do DOM
+        const quizContainer = document.getElementById('quiz-container');
+        const resultsContainer = document.getElementById('results-container');
+        const questionText = document.getElementById('question-text');
+        const optionsGrid = document.getElementById('options-grid');
+        const explanationArea = document.getElementById('explanation-area');
+        const explanationText = document.getElementById('explanation-text');
+        const nextBtn = document.getElementById('next-btn');
+        const finalScore = document.getElementById('final-score');
+        const progressText = document.getElementById('progress-text');
+        const progressBar = document.getElementById('progress-bar');
+
+        // Variáveis de estado do Quiz
+        let currentQuestionIndex = 0;
+        let score = 0;
+
+        function loadQuestion() {
+            // Reseta o estado anterior
+            explanationArea.classList.add('hidden');
+            nextBtn.classList.add('hidden');
+            optionsGrid.innerHTML = '';
+
+            if (currentQuestionIndex >= quizData.length) {
+                showResults();
+                return;
+            }
+
+            const currentQuestion = quizData[currentQuestionIndex];
+
+            // Atualiza a barra de progresso e texto
+            progressText.textContent = `Enigma ${currentQuestionIndex + 1} de ${quizData.length}`;
+            const progressPercentage = ((currentQuestionIndex) / quizData.length) * 100;
+            progressBar.style.width = `${progressPercentage}%`;
+            
+            // Exibe a pergunta
+            questionText.textContent = currentQuestion.question;
+
+            // Cria e exibe as opções
+            currentQuestion.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.innerHTML = `<span class="font-bold mr-2">${String.fromCharCode(65 + index)}:</span> ${option}`;
+                button.className = 'btn-option w-full text-left p-4 rounded-lg shadow-md text-amber-800 hover:bg-amber-100';
+                button.dataset.index = index;
+                button.addEventListener('click', selectAnswer);
+                optionsGrid.appendChild(button);
+            });
+        }
+
+        function selectAnswer(e) {
+            const selectedButton = e.currentTarget;
+            const selectedAnswerIndex = parseInt(selectedButton.dataset.index);
+            const correctAnswerIndex = quizData[currentQuestionIndex].correctAnswer;
+
+            // Desabilita todos os botões
+            Array.from(optionsGrid.children).forEach(btn => {
+                btn.disabled = true;
+            });
+
+            // Verifica a resposta e atualiza a pontuação
+            if (selectedAnswerIndex === correctAnswerIndex) {
+                score++;
+                selectedButton.classList.add('correct');
+            } else {
+                selectedButton.classList.add('incorrect');
+                // Mostra a resposta correta se o usuário errar
+                optionsGrid.children[correctAnswerIndex].classList.add('correct');
+            }
+
+            // Mostra a explicação
+            explanationText.textContent = quizData[currentQuestionIndex].explanation;
+            explanationArea.classList.remove('hidden');
+
+            // Mostra o botão de próximo
+            if (currentQuestionIndex < quizData.length -1) {
+                nextBtn.classList.remove('hidden');
+            } else {
+                // Se for a última questão, o botão leva para os resultados
+                nextBtn.textContent = 'Ver o Tesouro!';
+                nextBtn.classList.remove('hidden');
+            }
+        }
+
+        function showResults() {
+            quizContainer.classList.add('hidden');
+            resultsContainer.classList.remove('hidden');
+            finalScore.textContent = `${score} de ${quizData.length}`;
+        }
+
+        nextBtn.addEventListener('click', () => {
+            currentQuestionIndex++;
+            if(currentQuestionIndex >= quizData.length){
+                showResults();
+            } else {
+                loadQuestion();
+            }
+        });
+
+        // Inicia o quiz
+        window.onload = loadQuestion;
+    </script>
+
+</body>
+</html>
