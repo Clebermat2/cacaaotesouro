@@ -9,93 +9,217 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            /* Tamanho de fonte base, pode ser ajustado via JS */
+            font-size: 100%; 
+        }
         body {
             font-family: 'Merriweather', serif;
-            /* Imagem de fundo atualizada para um mapa mais detalhado */
             background-image: url('https://i.pinimg.com/originals/c8/63/35/c863354728c342374d7336a2a4038a33.jpg');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
+            transition: background-color 0.3s;
         }
         .font-pirate {
             font-family: 'IM Fell English SC', serif;
         }
         .card-bg {
-            background-color: rgba(253, 246, 221, 0.92); /* Cor de pergaminho com transparência */
-            border: 2px solid #854d0e; /* Borda marrom escura */
+            background-color: rgba(253, 246, 221, 0.92);
+            border: 2px solid #854d0e;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .btn-start {
+             transition: all 0.3s ease;
+             box-shadow: 0 5px 15px rgba(133, 77, 14, 0.4);
+        }
+        .btn-start:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(133, 77, 14, 0.6);
         }
         .btn-option {
             transition: all 0.3s ease;
             border: 2px solid #c2a17d;
             background-color: #f5eadd;
         }
-        .btn-option:hover {
+        .btn-option:hover:not(:disabled) {
             transform: translateY(-3px);
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
             border-color: #a17b54;
+            background-color: #f8f1e9;
         }
         .btn-option:disabled {
             cursor: not-allowed;
         }
         .correct {
-            background-color: #d4edda !important;
-            border-color: #c3e6cb !important;
-            color: #155724 !important;
+            background-color: #d1fae5 !important;
+            border-color: #6ee7b7 !important;
+            color: #065f46 !important;
         }
         .incorrect {
-            background-color: #f8d7da !important;
-            border-color: #f5c6cb !important;
-            color: #721c24 !important;
+            background-color: #fee2e2 !important;
+            border-color: #fca5a5 !important;
+            color: #991b1b !important;
         }
         .explanation {
             border-left: 4px solid #854d0e;
             background-color: rgba(255, 251, 235, 0.95);
         }
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 15px;
+            background-color: #f00;
+            top: -20px;
+            opacity: 0;
+            animation: fall 4s linear infinite;
+        }
+
+        @keyframes fall {
+            0% {
+                transform: translateY(0vh) rotateZ(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotateZ(720deg);
+                opacity: 0;
+            }
+        }
+
+        /* Estilos de Alto Contraste */
+        body.high-contrast {
+            background-image: none;
+            background-color: #fefce8; /* Fundo amarelo claro */
+        }
+        body.high-contrast .card-bg {
+            background-color: #ffffff;
+            border-color: #000000;
+            color: #000000;
+        }
+        body.high-contrast .text-amber-900,
+        body.high-contrast .text-amber-800,
+        body.high-contrast .text-amber-700 {
+            color: #000000;
+        }
+        body.high-contrast .btn-option {
+            background-color: #ffffff;
+            border-color: #000000;
+            color: #000000;
+        }
+        body.high-contrast .btn-option:hover:not(:disabled) {
+            background-color: #e2e8f0;
+        }
+        body.high-contrast .correct {
+            background-color: #a7f3d0 !important;
+            border: 3px solid #059669 !important;
+            color: #000000 !important;
+        }
+        body.high-contrast .incorrect {
+            background-color: #fecaca !important;
+            border: 3px solid #dc2626 !important;
+            color: #000000 !important;
+        }
+        body.high-contrast .bg-amber-800 {
+            background-color: #000000;
+            color: #ffffff;
+        }
+        body.high-contrast .hover\:bg-amber-900:hover {
+            background-color: #333333;
+        }
+        body.high-contrast .explanation {
+            background-color: #f1f5f9;
+            border-left-color: #000000;
+        }
+        body.high-contrast #progress-bar {
+            background-color: #000000;
+        }
+        body.high-contrast #progress-text {
+            color: #000000;
+        }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen p-4">
+<body class="flex items-center justify-center min-h-screen p-4 bg-amber-50">
 
-    <main id="quiz-container" class="w-full max-w-2xl mx-auto">
+    <div id="accessibility-controls" class="fixed top-4 right-4 z-50">
+        <div class="bg-white/80 backdrop-blur-sm rounded-lg shadow-lg p-2 flex flex-col items-center gap-2">
+            <button id="contrast-toggle" title="Alternar Alto Contraste" class="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 18a6 6 0 0 0 0-12v12z"></path></svg>
+            </button>
+            <button id="increase-font" title="Aumentar Fonte" class="p-2 w-10 h-10 flex items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300 transition text-lg font-bold">A+</button>
+            <button id="decrease-font" title="Diminuir Fonte" class="p-2 w-10 h-10 flex items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300 transition text-sm font-bold">A-</button>
+        </div>
+    </div>
+
+    <div id="sr-feedback" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+    
+    <!-- TELA DE INTRODUÇÃO -->
+    <div id="intro-container" class="w-full max-w-4xl mx-auto">
+        <div class="card-bg rounded-xl shadow-2xl p-6 md:p-10 text-center text-amber-900">
+            <h1 class="font-pirate text-5xl md:text-6xl mb-6">🎯 Caça ao Tesouro - Conhecendo as Regras</h1>
+            <div class="max-w-2xl mx-auto text-lg md:text-xl text-amber-800 space-y-4 mb-8">
+                 <p>Prepare-se, marujo! Sua missão é navegar pelos mares dos procedimentos administrativos.</p>
+                 <p>Você aprenderá sobre as atribuições do <strong>FNDE</strong>, das <strong>Entidades Executoras (EEx)</strong> e das <strong>Unidades Executoras (UEx)</strong> para encontrar o tesouro da habilitação escolar.</p>
+            </div>
+            <button id="start-btn" class="font-pirate bg-amber-800 text-white py-4 px-10 rounded-lg shadow-lg hover:bg-amber-900 transition-all duration-300 text-3xl btn-start">Começar o Desafio!</button>
+        </div>
+    </div>
+
+    <!-- TELA DO QUIZ -->
+    <main id="quiz-container" class="w-full max-w-4xl mx-auto hidden">
         <div class="card-bg rounded-xl shadow-2xl p-6 md:p-8 text-center text-amber-900">
-            <h1 class="font-pirate text-4xl md:text-5xl mb-2">Caça ao Tesouro</h1>
-            <h2 class="text-lg md:text-xl mb-6">O Mapa da Habilitação Escolar</h2>
+            <h1 class="font-pirate text-5xl md:text-6xl mb-2">Caça ao Tesouro</h1>
+            <h2 class="text-xl md:text-2xl mb-6">O Mapa da Habilitação Escolar</h2>
 
             <div id="question-area">
-                <p id="progress-text" class="text-sm mb-2 text-amber-800"></p>
-                <div class="w-full bg-amber-200 rounded-full h-2.5 mb-4">
-                    <div id="progress-bar" class="bg-amber-600 h-2.5 rounded-full" style="width: 0%"></div>
+                <p id="progress-text" class="text-lg mb-2 text-amber-800"></p>
+                <div class="w-full bg-amber-200 rounded-full h-3.5 mb-4">
+                    <div id="progress-bar" class="bg-amber-600 h-3.5 rounded-full transition-all duration-500" style="width: 0%"></div>
                 </div>
 
-                <h3 id="question-text" class="text-xl font-bold mb-6 min-h-[100px]">Carregando enigma...</h3>
+                <h3 id="question-text" class="text-2xl md:text-3xl font-bold mb-6 min-h-[150px] flex items-center justify-center">Carregando enigma...</h3>
                 
                 <div id="options-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <!-- Opções serão inseridas aqui pelo JavaScript -->
                 </div>
             </div>
 
-            <div id="explanation-area" class="mt-6 text-left p-4 rounded-lg explanation hidden">
-                <h4 class="font-bold text-lg mb-2 text-amber-900">A Resposta Correta:</h4>
-                <p id="explanation-text" class="text-amber-800"></p>
+            <div id="explanation-area" class="mt-8 text-left p-5 rounded-lg explanation hidden">
+                <h4 class="font-bold text-xl mb-2 text-amber-900">O Segredo do Mapa:</h4>
+                <p id="explanation-text" class="text-lg text-amber-800"></p>
             </div>
             
-            <button id="next-btn" class="font-pirate bg-amber-800 text-white py-3 px-8 rounded-lg shadow-lg hover:bg-amber-900 transition-all duration-300 mt-6 text-xl hidden">Próximo Enigma &rarr;</button>
+            <button id="next-btn" class="font-pirate bg-amber-800 text-white py-3 px-8 rounded-lg shadow-lg hover:bg-amber-900 transition-all duration-300 mt-8 text-2xl hidden">Próximo Enigma &rarr;</button>
 
         </div>
     </main>
 
-    <div id="results-container" class="w-full max-w-2xl mx-auto text-center hidden">
-        <div class="card-bg rounded-xl shadow-2xl p-8 md:p-10 text-amber-900">
-            <h1 class="font-pirate text-4xl md:text-5xl mb-4">Tesouro Encontrado!</h1>
-            <p class="text-lg mb-4">Você desvendou os enigmas da habilitação escolar!</p>
-            <p class="text-2xl font-bold mb-6">Sua pontuação final: <span id="final-score" class="text-amber-800"></span></p>
-            <img src="https://img.icons8.com/external-flaticons-flat-flat-icons/128/external-treasure-pirates-flaticons-flat-flat-icons.png" alt="Ícone de baú do tesouro" class="mx-auto mb-6">
-            <p class="text-md">Agora você está mais perto de garantir os recursos para sua escola. Continue navegando pelos mares do conhecimento!</p>
+    <!-- TELA DE RESULTADOS -->
+    <div id="results-container" class="w-full max-w-4xl mx-auto text-center hidden">
+        <div class="card-bg rounded-xl shadow-2xl p-8 md:p-10 text-amber-900 relative overflow-hidden">
+            <h1 id="results-title" class="font-pirate text-5xl md:text-6xl mb-4"></h1>
+            <p id="results-subtitle" class="text-xl mb-4"></p>
+            <p class="text-3xl font-bold mb-6">Sua pontuação final: <span id="final-score" class="text-amber-800"></span></p>
+            <div id="results-feedback-area" class="mx-auto mb-6 min-h-[128px] flex items-center justify-center">
+                 <!-- Conteúdo dinâmico: Imagem, Parabéns ou Botão de Tentar Novamente -->
+            </div>
+            <p id="results-final-message" class="text-lg"></p>
         </div>
     </div>
 
 
     <script>
-        // Array de questões atualizado para conter apenas 3 perguntas
         const quizData = [
             {
                 question: "Sua escola é representada por uma Associação de Pais e Mestres (APM) que gerencia diretamente os recursos recebidos. Essa APM é classificada como uma:",
@@ -123,8 +247,10 @@
         ];
 
         // Elementos do DOM
+        const introContainer = document.getElementById('intro-container');
         const quizContainer = document.getElementById('quiz-container');
         const resultsContainer = document.getElementById('results-container');
+        const startBtn = document.getElementById('start-btn');
         const questionText = document.getElementById('question-text');
         const optionsGrid = document.getElementById('options-grid');
         const explanationArea = document.getElementById('explanation-area');
@@ -133,13 +259,18 @@
         const finalScore = document.getElementById('final-score');
         const progressText = document.getElementById('progress-text');
         const progressBar = document.getElementById('progress-bar');
+        const srFeedback = document.getElementById('sr-feedback'); 
 
-        // Variáveis de estado do Quiz
         let currentQuestionIndex = 0;
         let score = 0;
+        
+        function startGame() {
+            introContainer.classList.add('hidden');
+            quizContainer.classList.remove('hidden');
+            loadQuestion();
+        }
 
         function loadQuestion() {
-            // Reseta o estado anterior
             explanationArea.classList.add('hidden');
             nextBtn.classList.add('hidden');
             optionsGrid.innerHTML = '';
@@ -150,20 +281,17 @@
             }
 
             const currentQuestion = quizData[currentQuestionIndex];
-
-            // Atualiza a barra de progresso e texto
             progressText.textContent = `Enigma ${currentQuestionIndex + 1} de ${quizData.length}`;
-            const progressPercentage = ((currentQuestionIndex) / quizData.length) * 100;
+            const progressPercentage = (currentQuestionIndex / quizData.length) * 100;
             progressBar.style.width = `${progressPercentage}%`;
             
-            // Exibe a pergunta
             questionText.textContent = currentQuestion.question;
+            srFeedback.textContent = `Enigma ${currentQuestionIndex + 1}: ${currentQuestion.question}`;
 
-            // Cria e exibe as opções
             currentQuestion.options.forEach((option, index) => {
                 const button = document.createElement('button');
                 button.innerHTML = `<span class="font-bold mr-2">${String.fromCharCode(65 + index)}:</span> ${option}`;
-                button.className = 'btn-option w-full text-left p-4 rounded-lg shadow-md text-amber-800 hover:bg-amber-100';
+                button.className = 'btn-option w-full text-left p-5 rounded-lg shadow-md text-amber-800 text-lg';
                 button.dataset.index = index;
                 button.addEventListener('click', selectAnswer);
                 optionsGrid.appendChild(button);
@@ -173,32 +301,34 @@
         function selectAnswer(e) {
             const selectedButton = e.currentTarget;
             const selectedAnswerIndex = parseInt(selectedButton.dataset.index);
-            const correctAnswerIndex = quizData[currentQuestionIndex].correctAnswer;
+            const currentQuestion = quizData[currentQuestionIndex];
+            const correctAnswerIndex = currentQuestion.correctAnswer;
 
-            // Desabilita todos os botões
             Array.from(optionsGrid.children).forEach(btn => {
                 btn.disabled = true;
             });
 
-            // Verifica a resposta e atualiza a pontuação
             if (selectedAnswerIndex === correctAnswerIndex) {
                 score++;
                 selectedButton.classList.add('correct');
+                srFeedback.textContent = `Resposta correta. ${currentQuestion.explanation}`;
             } else {
                 selectedButton.classList.add('incorrect');
-                // Mostra a resposta correta se o usuário errar
                 optionsGrid.children[correctAnswerIndex].classList.add('correct');
+                srFeedback.textContent = `Resposta incorreta. A resposta certa é: ${currentQuestion.options[correctAnswerIndex]}. ${currentQuestion.explanation}`;
             }
 
-            // Mostra a explicação
-            explanationText.textContent = quizData[currentQuestionIndex].explanation;
+            explanationText.textContent = currentQuestion.explanation;
             explanationArea.classList.remove('hidden');
 
-            // Mostra o botão de próximo
-            if (currentQuestionIndex < quizData.length -1) {
+            const progressPercentage = ((currentQuestionIndex + 1) / quizData.length) * 100;
+            progressBar.style.width = `${progressPercentage}%`;
+
+            if (currentQuestionIndex < quizData.length - 1) {
+                nextBtn.textContent = 'Próximo Enigma →';
                 nextBtn.classList.remove('hidden');
             } else {
-                // Se for a última questão, o botão leva para os resultados
+                progressText.textContent = 'Mapa completo!';
                 nextBtn.textContent = 'Ver o Tesouro!';
                 nextBtn.classList.remove('hidden');
             }
@@ -208,20 +338,96 @@
             quizContainer.classList.add('hidden');
             resultsContainer.classList.remove('hidden');
             finalScore.textContent = `${score} de ${quizData.length}`;
+            srFeedback.textContent = `Quiz finalizado. Sua pontuação final: ${score} de ${quizData.length}.`;
+
+            const resultsTitle = document.getElementById('results-title');
+            const resultsSubtitle = document.getElementById('results-subtitle');
+            const feedbackArea = document.getElementById('results-feedback-area');
+            const finalMessage = document.getElementById('results-final-message');
+            
+            feedbackArea.innerHTML = ''; // Limpa a área de feedback
+
+            if (score === 2) {
+                resultsTitle.textContent = 'Parabéns!';
+                resultsSubtitle.textContent = 'Você desvendou os enigmas da habilitação escolar!';
+                // Não exibe imagem, apenas o texto de parabéns abaixo da pontuação.
+                finalMessage.textContent = 'Agora você está mais perto de garantir os recursos para sua escola. Continue navegando pelos mares do conhecimento!';
+                triggerConfetti();
+            } else if (score < 2) { // Pontuação 1 ou 0
+                resultsTitle.textContent = 'Quase lá!';
+                resultsSubtitle.textContent = 'Parece que um tesouro ainda está escondido.';
+                feedbackArea.innerHTML = `<button id="restart-btn" class="font-pirate bg-amber-800 text-white py-3 px-8 rounded-lg shadow-lg hover:bg-amber-900 transition-all duration-300 mt-4 text-2xl">Volte e reveja todas as questões</button>`;
+                finalMessage.textContent = 'Estude o mapa novamente para se tornar um capitão do conhecimento!';
+                document.getElementById('restart-btn').addEventListener('click', () => window.location.reload());
+            } else { // Pontuação máxima
+                resultsTitle.textContent = 'Tesouro Encontrado!';
+                resultsSubtitle.textContent = 'Você desvendou todos os enigmas da habilitação escolar!';
+                feedbackArea.innerHTML = `<img src="https://img.icons8.com/external-flaticons-flat-flat-icons/128/external-treasure-pirates-flaticons-flat-flat-icons.png" 
+                 alt="Ícone de baú do tesouro" 
+                 class="mx-auto"
+                 onerror="this.onerror=null; this.src='https://placehold.co/128x128/fdf6dd/854d0e?text=Tesouro!';">`;
+                finalMessage.textContent = 'Você é um mestre dos mares do conhecimento!';
+                triggerConfetti();
+            }
         }
+
+        function triggerConfetti() {
+            const container = document.querySelector('#results-container .card-bg');
+            const colors = ['#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5', '#2196f3', '#03a9f4', '#00bcd4', '#009688', '#4caf50', '#8bc34a', '#cddc39', '#ffeb3b', '#ffc107', '#ff9800'];
+            for (let i = 0; i < 150; i++) {
+                const confetti = document.createElement('div');
+                confetti.classList.add('confetti');
+                confetti.style.left = `${Math.random() * 100}%`;
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.animationDelay = `${Math.random() * 4}s`;
+                confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+                container.appendChild(confetti);
+            }
+        }
+        
+        startBtn.addEventListener('click', startGame);
 
         nextBtn.addEventListener('click', () => {
             currentQuestionIndex++;
-            if(currentQuestionIndex >= quizData.length){
-                showResults();
-            } else {
-                loadQuestion();
+            loadQuestion();
+        });
+
+        // --- Controles de Acessibilidade ---
+        const body = document.body;
+        const contrastToggle = document.getElementById('contrast-toggle');
+        const increaseFontBtn = document.getElementById('increase-font');
+        const decreaseFontBtn = document.getElementById('decrease-font');
+
+        const FONT_STEPS = [0.9, 1, 1.15, 1.3, 1.5]; 
+        let currentFontStep = 1; // Começa no tamanho padrão (100%)
+
+        function updateFontSize() {
+            document.documentElement.style.fontSize = `${FONT_STEPS[currentFontStep] * 100}%`;
+        }
+
+        contrastToggle.addEventListener('click', () => {
+            body.classList.toggle('high-contrast');
+        });
+
+        increaseFontBtn.addEventListener('click', () => {
+            if (currentFontStep < FONT_STEPS.length - 1) {
+                currentFontStep++;
+                updateFontSize();
             }
         });
 
-        // Inicia o quiz
-        window.onload = loadQuestion;
+        decreaseFontBtn.addEventListener('click', () => {
+            if (currentFontStep > 0) {
+                currentFontStep--;
+                updateFontSize();
+            }
+        });
+
     </script>
 
 </body>
 </html>
+
+
+
+
